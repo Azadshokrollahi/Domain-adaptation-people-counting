@@ -1,0 +1,69 @@
+rooms:
+
+  Room_A:
+    name: "Room A"
+    path: "data/our_dataset/room_a/clean_data_final.csv"
+
+    selected_rows: [44027, 45081]
+
+    scenario: "scenario_1"
+
+    feature_variants:
+
+      homogeneous:
+        - co2_value
+        - motion_event_count
+
+      heterogeneous:
+        - noise_value
+        - co2_value
+        - motion_event_count
+
+  Room_B:
+    name: "Room B"
+    path: "data/our_dataset/room_b/clean_data_final.csv"
+
+    selected_rows: [40027, 41081]
+
+    scenario: "scenario_1"
+
+    feature_variants:
+
+      homogeneous:
+        - co2_value
+        - motion_event_count
+
+  Room_C:
+    name: "Room C"
+    path: "data/our_dataset/room_c/clean_data_final.csv"
+
+    selected_rows: [21995, 23049]
+
+    scenario: "scenario_2"
+
+    feature_variants:
+
+      homogeneous:
+        - co2_value
+        - motion_event_count
+
+  Room_P:
+    name: "Public"
+    path: "data/public_data/public_room_5min.csv"
+
+    selected_rows: null
+
+    scenario: "scenario_1"
+
+    feature_variants:
+
+      homogeneous:
+        - co2_value
+        - motion_event_count
+
+      heterogeneous:
+        - co2_value
+        - motion_event_count
+        - temperature
+        - light
+        - sound_relative_dbm
