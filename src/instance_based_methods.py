@@ -2,6 +2,7 @@
 Instance-Based Domain Adaptation Transfer Learning for People Counting
 RNN/LSTM/Transformer + KMM / ULSIF / RULSIF / TrAdaBoostR2 / IWC
                     + KMM+TSBW / ULSIF+TSBW / RULSIF+TSBW / IWC+TSBW
+                    + KMM+TSW  / ULSIF+TSW  / RULSIF+TSW  / IWC+TSW
 
 Reads:
   • configs/rooms.yaml   → room paths, scenarios, feature_variants, selected_rows
@@ -11,7 +12,7 @@ Outputs (per variant):
   • results/instance_based_transfer/all_instance_based_homogeneous.csv
   • results/instance_based_transfer/all_instance_based_heterogeneous.csv
 
-Methods (11 per scenario × model × ws):
+Methods (15 per scenario × model × ws):
   0.  Target-Only         — No source, target train only (baseline)
   1.  Baseline            — Source + target, uniform weights (baseline)
   2.  KMM                 — Kernel Mean Matching (Huang et al., 2006)
@@ -23,6 +24,10 @@ Methods (11 per scenario × model × ws):
   8.  ULSIF + TSBW        — ULSIF density-ratio × TSBW label-aware weight
   9.  RULSIF + TSBW       — RULSIF density-ratio × TSBW label-aware weight
   10. IWC + TSBW          — IWC density-ratio × TSBW label-aware weight
+  11. KMM + TSW           — KMM density-ratio × TSW label-aware weight
+  12. ULSIF + TSW         — ULSIF density-ratio × TSW label-aware weight
+  13. RULSIF + TSW        — RULSIF density-ratio × TSW label-aware weight
+  14. IWC + TSW           — IWC density-ratio × TSW label-aware weight
 
 Heterogeneous mode:
   • Each room uses its own feature list from rooms.yaml.
@@ -33,6 +38,10 @@ Heterogeneous mode:
 TSBW (matches parameter_based_methods.py and feature_based_methods.py):
   FREQUENCY_EPS=1.0, TSBW_FLOOR=0.3, TSBW_ABSENT=0.05,
   TSBW_USE_SQRT=True, WEIGHT_CLIP_MAX=10.0
+
+TSW (matches parameter_based_methods.py):
+  FREQUENCY_EPS=1.0, TSW_ABSENT=0.0,
+  Linear ratio weighting — no sqrt, no floor.
 
 Complexity timing (added per row):
   model_complexity_time_sec =
@@ -121,6 +130,10 @@ TSBW_ABSENT     = 0.05
 TSBW_USE_SQRT   = True
 WEIGHT_CLIP_MAX = 10.0
 
+# ── NEW: TSW ──────────────────────────────────────────────────────────────
+TSW_ABSENT      = 0.05   # labels absent in target → weight 0 (hard exclusion)
+# ── END NEW ───────────────────────────────────────────────────────────────
+
 
 def compute_tsbw_label_weights(y_src, y_ref,
                                eps=FREQUENCY_EPS,
@@ -148,6 +161,40 @@ def compute_tsbw_label_weights(y_src, y_ref,
     return raw
 
 
+# ── NEW: TSW ──────────────────────────────────────────────────────────────
+def compute_tsw_label_weights(y_src, y_ref,
+                              eps=FREQUENCY_EPS,
+                              absent=TSW_ABSENT):
+    """
+    TSW: Target Sample Weighting.
+    Linear proportional weighting based on target label frequency.
+    No sqrt, no floor — raw frequency ratio.
+    Source samples whose label is absent in target receive weight = TSW_ABSENT (0.0).
+
+    Difference from TSBW:
+      TSBW: sqrt(ratio) + floor=0.3   → smoothed, prevents extreme down-weighting
+      TSW:  raw ratio,  no floor      → stronger emphasis on target-frequent labels
+    """
+    y_ref_int = np.clip(np.round(y_ref).astype(int), 0, None)
+    max_y = int(y_ref_int.max()) if len(y_ref_int) > 0 else 0
+    counts = np.bincount(y_ref_int, minlength=max_y + 1).astype(float)
+    max_count = max(counts.max(), 1.0)
+
+    table = {}
+    for yv in range(max_y + 1):
+        if counts[yv] > 0:
+            table[int(yv)] = float((counts[yv] + eps) / (max_count + eps))
+        else:
+            table[int(yv)] = float(absent)
+
+    y_src_int = np.round(y_src).astype(int)
+    raw = np.empty(len(y_src_int), dtype=np.float64)
+    for i, yv in enumerate(y_src_int):
+        raw[i] = absent if (yv < 0 or yv > max_y) else table.get(int(yv), absent)
+    return raw
+# ── END NEW ───────────────────────────────────────────────────────────────
+
+
 def normalize_and_clip(w, clip_max=WEIGHT_CLIP_MAX):
     w = np.asarray(w, dtype=np.float64)
     w = np.maximum(w, 0)
@@ -160,6 +207,13 @@ def normalize_and_clip(w, clip_max=WEIGHT_CLIP_MAX):
 ##############################################################################
 
 def compute_kmm_weights(X_src, X_tgt):
+    # ── FIX ──────────────────────────────────────────────────────────────
+    # cvxopt's QP solver (matrix()) accepts only float64. The pipeline feeds
+    # float32 (load_room_raw → StandardScaler), which raises
+    # "TypeError: buffer format not supported". Cast explicitly. (verified via check.py)
+    X_src = np.ascontiguousarray(X_src, dtype=np.float64)
+    X_tgt = np.ascontiguousarray(X_tgt, dtype=np.float64)
+    # ── END FIX ──────────────────────────────────────────────────────────
     n_s = len(X_src)
     kmm = KMM(estimator=None, Xt=X_tgt, kernel="rbf", B=10,
               eps=(np.sqrt(n_s) - 1) / np.sqrt(n_s),
@@ -250,9 +304,11 @@ def compute_ib_weights_raw(method, src_scaled, tgt_scaled, src_y=None, tgt_y=Non
 
 
 def compute_adaptation_weights(method, src_scaled, tgt_scaled, src_y=None, tgt_y=None,
-                               apply_tsbw=False):
+                               apply_tsbw=False,
+                               apply_tsw=False):        # ── NEW: TSW ──
     n_s, n_t = len(src_scaled), len(tgt_scaled)
-    base_method = method.replace('+TSBW', '')
+    base_method = (method.replace('+TSBW', '')
+                         .replace('+TSW', ''))          # ── NEW: TSW ──
     print(f"    Computing {method} weights (src={n_s}, tgt={n_t})...")
 
     t0 = time.perf_counter()
@@ -265,6 +321,17 @@ def compute_adaptation_weights(method, src_scaled, tgt_scaled, src_y=None, tgt_y
         sw = normalize_and_clip(sw_raw * w_label, WEIGHT_CLIP_MAX)
         print(f"      TSBW labels: mean={w_label.mean():.4f}, "
               f"min={w_label.min():.4f}, max={w_label.max():.4f}")
+
+    # ── NEW: TSW ──────────────────────────────────────────────────────────
+    elif apply_tsw:
+        if src_y is None or tgt_y is None:
+            raise ValueError("TSW requires src_y and tgt_y")
+        w_label = compute_tsw_label_weights(src_y, tgt_y)
+        sw = normalize_and_clip(sw_raw * w_label, WEIGHT_CLIP_MAX)
+        print(f"      TSW labels: mean={w_label.mean():.4f}, "
+              f"min={w_label.min():.4f}, max={w_label.max():.4f}")
+    # ── END NEW ───────────────────────────────────────────────────────────
+
     else:
         sw = np.clip(np.maximum(sw_raw, 0) / max(sw_raw.mean(), 1e-8),
                      0, WEIGHT_CLIP_MAX)
@@ -306,6 +373,12 @@ ADAPTATION_METHODS = [
     ('ULSIF+TSBW',   'ULSIF',        'tsbw'),
     ('RULSIF+TSBW',  'RULSIF',       'tsbw'),
     ('IWC+TSBW',     'IWC',          'tsbw'),
+    # ── NEW: TSW variants ─────────────────────────────────────────────────
+    ('KMM+TSW',      'KMM',          'tsw'),
+    ('ULSIF+TSW',    'ULSIF',        'tsw'),
+    ('RULSIF+TSW',   'RULSIF',       'tsw'),
+    ('IWC+TSW',      'IWC',          'tsw'),
+    # ── END NEW ───────────────────────────────────────────────────────────
 ]
 
 
@@ -472,7 +545,9 @@ def prepare_target_only_data(tgt_tr_X, tgt_tr_y, tgt_va_X, tgt_va_y,
 
 def prepare_transfer_data(src_X, src_y, tgt_tr_X, tgt_tr_y, tgt_va_X, tgt_va_y,
                           tgt_te_X, tgt_te_y, ws,
-                          ib_method=None, apply_tsbw=False, bs=32):
+                          ib_method=None, apply_tsbw=False,
+                          apply_tsw=False,              # ── NEW: TSW ──
+                          bs=32):
     combined = np.vstack([src_X, tgt_tr_X])
     scaler = StandardScaler().fit(combined)
     src_scaled    = scaler.transform(src_X)
@@ -483,12 +558,22 @@ def prepare_transfer_data(src_X, src_y, tgt_tr_X, tgt_tr_y, tgt_va_X, tgt_va_y,
 
     if ib_method is not None:
         try:
-            method_label = f"{ib_method}+TSBW" if apply_tsbw else ib_method
+            # ── NEW: TSW label in method name ────────────────────────────
+            if apply_tsbw:
+                method_label = f"{ib_method}+TSBW"
+            elif apply_tsw:
+                method_label = f"{ib_method}+TSW"
+            else:
+                method_label = ib_method
+            # ── END NEW ──────────────────────────────────────────────────
             source_weights, _, weight_compute_time_sec = compute_adaptation_weights(
                 method_label, src_scaled, tgt_tr_scaled, src_y, tgt_tr_y,
-                apply_tsbw=apply_tsbw)
+                apply_tsbw=apply_tsbw,
+                apply_tsw=apply_tsw)                    # ── NEW: TSW ──
         except Exception as e:
-            print(f"    {ib_method} (tsbw={apply_tsbw}) failed: {e}. Falling back to uniform.")
+            print(f"    {ib_method} (tsbw={apply_tsbw}, tsw={apply_tsw}) "  # ── NEW: TSW ──
+                  f"failed: {e}. Falling back to uniform.")
+            traceback.print_exc()                       # ── FIX: surface the real error ──
             weight_compute_time_sec = 0.0
 
     X_src, y_src = create_sequences(src_scaled, src_y, ws)
@@ -760,6 +845,10 @@ def main():
     print(f"Variants: {FEATURE_VARIANTS}")
     print(f"TSBW: floor={TSBW_FLOOR}, absent={TSBW_ABSENT}, sqrt={TSBW_USE_SQRT}, "
           f"eps={FREQUENCY_EPS}, clip={WEIGHT_CLIP_MAX}")
+    # ── NEW: TSW ──────────────────────────────────────────────────────────
+    print(f"TSW:  absent={TSW_ABSENT}, linear ratio (no sqrt, no floor), "
+          f"eps={FREQUENCY_EPS}, clip={WEIGHT_CLIP_MAX}")
+    # ── END NEW ───────────────────────────────────────────────────────────
     print(f"OUTPUT_ROOT: {OUTPUT_ROOT}")
     print(f"User: Azadshokrollahi | {timestamp} UTC")
     print("=" * 110)
@@ -775,7 +864,6 @@ def main():
         valid_scenarios = [(s, t) for (s, t) in TRANSFER_SCENARIOS
                            if variant_scenario_supported(s, t, variant)]
 
-        # Instance-based weight computation requires matching feature dimensions
         runnable = []
         for s, t in valid_scenarios:
             sf = get_variant_features(s, variant)
@@ -819,8 +907,6 @@ def main():
                 tgt_cfg['path'], tgt_cfg['features'],
                 tgt_cfg['name'], tgt_cfg['selected_rows'])
 
-            # Source is split with its own scenario, but only train is used as
-            # the source domain pool (instance weights compare src_train vs tgt_train).
             src_tr_X, src_tr_y, _, _, _, _, _ = split_by_scenario(
                 src_X, src_y, src_cfg['scenario'])
 
@@ -861,14 +947,19 @@ def main():
                                 data = prepare_transfer_data(
                                     src_tr_X, src_tr_y, tgt_tr_X, tgt_tr_y,
                                     tgt_va_X, tgt_va_y, tgt_te_X, tgt_te_y,
-                                    ws, ib_method=None, apply_tsbw=False, bs=BATCH_SIZE)
+                                    ws, ib_method=None,
+                                    apply_tsbw=False, apply_tsw=False,  # ── NEW: TSW ──
+                                    bs=BATCH_SIZE)
                             else:
                                 apply_tsbw = (weight_scheme == 'tsbw')
+                                apply_tsw  = (weight_scheme == 'tsw')  # ── NEW: TSW ──
                                 data = prepare_transfer_data(
                                     src_tr_X, src_tr_y, tgt_tr_X, tgt_tr_y,
                                     tgt_va_X, tgt_va_y, tgt_te_X, tgt_te_y,
                                     ws, ib_method=base_method,
-                                    apply_tsbw=apply_tsbw, bs=BATCH_SIZE)
+                                    apply_tsbw=apply_tsbw,
+                                    apply_tsw=apply_tsw,                # ── NEW: TSW ──
+                                    bs=BATCH_SIZE)
 
                             model = build_model(model_type, data['input_size'])
 
@@ -945,7 +1036,7 @@ def main():
                           f"ws={ws} — {len(method_results)}/{len(ADAPTATION_METHODS)}")
 
     # ─────────────────────────────────────────────────────────────────────────
-    # MASTER CSVs (one per variant)
+    # MASTER CSVs
     # ─────────────────────────────────────────────────────────────────────────
     print("\n\n" + "=" * 110)
     print("FINAL RESULTS — INSTANCE-BASED TRANSFER")
@@ -990,16 +1081,24 @@ def main():
                   f"{best['test_mae']:<8.4f} {best['test_acc_pm1']:<8.2f} "
                   f"{best['model_complexity_time_sec']:<11.3f}")
 
-        # IB vs IB+TSBW summary
-        print(f"\n  [{variant}] IB vs IB+TSBW (avg MAE / avg complexity):")
+        # IB vs IB+TSBW vs IB+TSW summary
+        print(f"\n  [{variant}] IB vs IB+TSBW vs IB+TSW (avg MAE / avg complexity):")
         for base in ['KMM', 'ULSIF', 'RULSIF', 'IWC']:
             base_df = df[df['method'] == base]
             tsbw_df = df[df['method'] == f'{base}+TSBW']
-            if len(base_df) > 0 and len(tsbw_df) > 0:
-                print(f"    {base:<8}: MAE={base_df['test_mae'].mean():.4f}, "
-                      f"Time={base_df['model_complexity_time_sec'].mean():.3f}s  |  "
-                      f"{base}+TSBW: MAE={tsbw_df['test_mae'].mean():.4f}, "
-                      f"Time={tsbw_df['model_complexity_time_sec'].mean():.3f}s")
+            tsw_df  = df[df['method'] == f'{base}+TSW']   # ── NEW: TSW ──
+            if len(base_df) > 0:
+                line = (f"    {base:<8}: MAE={base_df['test_mae'].mean():.4f}, "
+                        f"Time={base_df['model_complexity_time_sec'].mean():.3f}s")
+                if len(tsbw_df) > 0:
+                    line += (f"  |  +TSBW: MAE={tsbw_df['test_mae'].mean():.4f}, "
+                             f"Time={tsbw_df['model_complexity_time_sec'].mean():.3f}s")
+                # ── NEW: TSW ──────────────────────────────────────────────
+                if len(tsw_df) > 0:
+                    line += (f"  |  +TSW:  MAE={tsw_df['test_mae'].mean():.4f}, "
+                             f"Time={tsw_df['model_complexity_time_sec'].mean():.3f}s")
+                # ── END NEW ───────────────────────────────────────────────
+                print(line)
 
     print("\n" + "=" * 110)
     print("✓ INSTANCE-BASED TRANSFER COMPLETED!")

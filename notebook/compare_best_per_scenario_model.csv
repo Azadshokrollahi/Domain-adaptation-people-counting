@@ -1,0 +1,55 @@
+scenario,model,best_family,best_method,scheme,MAE,Acc_pm1,cost_sec
+Room_A -> Room_B,LSTM,Parameter-Based,Source-to-Target Linear Mapping,none,0.2253676917247856,97.5,0.0
+Room_A -> Room_B,RNN,Parameter-Based,LinInt (alpha=0.75),none,0.2139114737510681,98.5,2.3861690150001778
+Room_A -> Room_B,Transformer,Parameter-Based,Label-Aware Pretrain to Target FT (tsbw),tsbw,0.1937761753797531,99.5,5.847143383999992
+Room_A -> Room_P,LSTM,Parameter-Based,Target-Priority Joint FT (tsbw),tsbw,0.0767425000667572,99.0,3.719295066000086
+Room_A -> Room_P,RNN,Parameter-Based,Source Model + Target Calibration,none,0.0745368599891662,99.5,0.0
+Room_A -> Room_P,Transformer,Parameter-Based,Source Model + Target Calibration,none,0.0652972757816314,99.5,0.0
+Room_A → Room_B,LSTM,Instance-Based,KMM,none,0.2136665731668472,98.5,4.483394091999799
+Room_A → Room_B,RNN,Feature-Based,CCSA_tsbw,tsbw,0.2034405916929245,99.0,2.9100637340015965
+Room_A → Room_B,Transformer,Feature-Based,DeepMMD_tsw,tsw,0.1860612034797668,100.0,6.976986855999712
+Room_A → Room_P,LSTM,Instance-Based,ULSIF+TSBW,tsbw,0.0735539495944976,99.5,3.64701801999945
+Room_A → Room_P,RNN,Instance-Based,IWC+TSW,tsw,0.0817635804414749,99.5,3.135112316000232
+Room_A → Room_P,Transformer,Instance-Based,Baseline,none,0.0604794323444366,99.5,5.446105076000094
+Room_B -> Room_C,LSTM,Parameter-Based,LinInt (alpha=1.00),none,0.5903751850128174,94.47236180904522,2.866888685999584
+Room_B -> Room_C,RNN,Parameter-Based,LinInt (alpha=1.00),none,0.5790900588035583,95.47738693467338,2.357427395000286
+Room_B -> Room_C,Transformer,Parameter-Based,Thresholded Label-Aware FT (tsw),tsw,0.593486487865448,96.4824120603015,5.589718898000228
+Room_B -> Room_P,LSTM,Parameter-Based,Target-Priority Joint FT (tsbw),tsbw,0.0697212666273117,99.5,3.780469222999727
+Room_B -> Room_P,RNN,Parameter-Based,Label-Aware Joint FT (tsw),tsw,0.0715482980012893,99.0,3.179471606000334
+Room_B -> Room_P,Transformer,Parameter-Based,Thresholded Label-Aware FT (tsbw),tsbw,0.0541303865611553,99.5,5.670822421000139
+Room_B → Room_C,LSTM,Feature-Based,FA_none,none,0.5512323379516602,94.47236180904522,3.4626135120015533
+Room_B → Room_C,RNN,Feature-Based,PRED_tsw,tsw,0.5508237481117249,94.47236180904522,4.629196203000902
+Room_B → Room_C,Transformer,Instance-Based,Baseline,none,0.6241078972816467,95.47738693467338,5.52491055199971
+Room_B → Room_P,LSTM,Instance-Based,ULSIF,none,0.0626306384801864,99.5,3.631538829999954
+Room_B → Room_P,RNN,Feature-Based,DeepMMD_tsw,tsw,0.0649939626455307,99.5,4.245400268999219
+Room_B → Room_P,Transformer,Instance-Based,KMM+TSBW,tsbw,0.0568463765084743,99.5,6.631048121000276
+Room_C -> Room_A,LSTM,Parameter-Based,Thresholded Label-Aware FT (tsw),tsw,0.4061519205570221,90.5,2.739875196000412
+Room_C -> Room_A,RNN,Parameter-Based,Thresholded Label-Aware FT (tsw),tsw,0.3219596743583679,94.5,2.4509077380002964
+Room_C -> Room_A,Transformer,Parameter-Based,Joint-Training,none,0.2159036844968795,97.5,5.924433399000009
+Room_C -> Room_P,LSTM,Parameter-Based,Target-Priority Joint FT (tsw),tsw,0.0802089720964431,98.5,3.6723567130002266
+Room_C -> Room_P,RNN,Parameter-Based,Target-Priority Joint FT (tsw),tsw,0.0795813649892807,99.0,3.257167028999902
+Room_C -> Room_P,Transformer,Parameter-Based,Thresholded Label-Aware FT (tsw),tsw,0.0588767863810062,99.5,4.541977010999744
+Room_C → Room_A,LSTM,Feature-Based,CCSA_tsbw,tsbw,0.2068080753087997,97.0,3.34970854599851
+Room_C → Room_A,RNN,Feature-Based,DeepMMD_tsbw,tsbw,0.2257408499717712,95.5,4.428731452000648
+Room_C → Room_A,Transformer,Feature-Based,DeepMMD_tsbw,tsbw,0.1891890913248062,98.0,6.815531286001715
+Room_C → Room_P,LSTM,Instance-Based,RULSIF+TSW,tsw,0.0775083899497985,99.5,3.929809117998957
+Room_C → Room_P,RNN,Feature-Based,FA_none,none,0.0865662321448326,99.5,2.885001385999203
+Room_C → Room_P,Transformer,Feature-Based,FA_tsbw,tsbw,0.0683645606040954,99.5,5.792600217999279
+Room_P -> Room_A,LSTM,Parameter-Based,Target-Priority Joint FT (tsw),tsw,0.2341055124998092,97.0,3.645978013000331
+Room_P -> Room_A,RNN,Parameter-Based,Target-Priority Joint FT (tsw),tsw,0.2532080411911011,95.0,3.1686757190000208
+Room_P -> Room_A,Transformer,Parameter-Based,Label-Aware Joint FT (tsbw),tsbw,0.1815564930438995,98.5,6.100201203999859
+Room_P -> Room_B,LSTM,Parameter-Based,Full-Fine-Tuning,none,0.1633613258600235,99.5,1.770338769999853
+Room_P -> Room_B,RNN,Parameter-Based,Partial-FT-Last,none,0.2121652960777282,98.5,1.5212182549998945
+Room_P -> Room_B,Transformer,Parameter-Based,LinInt (alpha=0.50),none,0.1604674011468887,99.0,4.484658319000118
+Room_P -> Room_C,LSTM,Parameter-Based,LinInt (alpha=1.00),none,0.5903751850128174,94.47236180904522,2.791770952999741
+Room_P -> Room_C,RNN,Parameter-Based,LinInt (alpha=1.00),none,0.5790900588035583,95.47738693467338,2.372838751999552
+Room_P -> Room_C,Transformer,Parameter-Based,Target-Priority Joint FT (tsbw),tsbw,0.6266502737998962,92.964824120603,5.895926095000505
+Room_P → Room_A,LSTM,Feature-Based,PRED_tsbw,tsbw,0.2488569319248199,95.0,5.330409843998496
+Room_P → Room_A,RNN,Feature-Based,CORAL_tsw,tsw,0.2809842824935913,95.0,3.172828233002292
+Room_P → Room_A,Transformer,Feature-Based,CORAL_tsw,tsw,0.221514344215393,96.0,5.823533484997824
+Room_P → Room_B,LSTM,Feature-Based,PRED_tsbw,tsbw,0.1944716274738311,99.5,5.314799211000718
+Room_P → Room_B,RNN,Feature-Based,DeepMMD_tsw,tsw,0.2045707106590271,99.0,4.2207145240008686
+Room_P → Room_B,Transformer,Instance-Based,ULSIF+TSW,tsw,0.1704415380954742,100.0,5.861125960999743
+Room_P → Room_C,LSTM,Feature-Based,FA_none,none,0.5296510457992554,95.97989949748744,3.386864034000609
+Room_P → Room_C,RNN,Feature-Based,DeepMMD_tsbw,tsbw,0.5493201613426208,95.47738693467338,4.243449513000087
+Room_P → Room_C,Transformer,Feature-Based,DeepMMD_tsbw,tsbw,0.5922020673751831,92.964824120603,6.866662236001503

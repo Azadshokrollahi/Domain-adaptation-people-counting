@@ -1,0 +1,5 @@
+component,cheapest_family,cheapest_sec,most_expensive_family,most_expensive_sec
+source_train,Instance-Based,0.0,Parameter-Based,0.910611030786557
+target_train,Parameter-Based,1.8547309267441514,Feature-Based,5.856413742761932
+weight_compute,Parameter-Based,0.0001253200789492544,Instance-Based,0.3274603934690894
+alignment_train,Feature-Based,0.0,Feature-Based,0.0

@@ -1,0 +1,185 @@
+family,method,model,n_runs,total_params,trainable_params,frozen_params
+Feature-Based,CCSA_none,RNN,9,12737,12737,0
+Feature-Based,CCSA_none,LSTM,9,50753,50753,0
+Feature-Based,CCSA_none,Transformer,9,67201,67201,0
+Feature-Based,CCSA_tsbw,RNN,9,12737,12737,0
+Feature-Based,CCSA_tsbw,LSTM,9,50753,50753,0
+Feature-Based,CCSA_tsbw,Transformer,9,67201,67201,0
+Feature-Based,CCSA_tsw,RNN,9,12737,12737,0
+Feature-Based,CCSA_tsw,LSTM,9,50753,50753,0
+Feature-Based,CCSA_tsw,Transformer,9,67201,67201,0
+Feature-Based,CORAL_none,RNN,9,12737,12737,0
+Feature-Based,CORAL_none,LSTM,9,50753,50753,0
+Feature-Based,CORAL_none,Transformer,9,67201,67201,0
+Feature-Based,CORAL_tsbw,RNN,9,12737,12737,0
+Feature-Based,CORAL_tsbw,LSTM,9,50753,50753,0
+Feature-Based,CORAL_tsbw,Transformer,9,67201,67201,0
+Feature-Based,CORAL_tsw,RNN,9,12737,12737,0
+Feature-Based,CORAL_tsw,LSTM,9,50753,50753,0
+Feature-Based,CORAL_tsw,Transformer,9,67201,67201,0
+Feature-Based,DeepCORAL_none,RNN,9,12737,12737,0
+Feature-Based,DeepCORAL_none,LSTM,9,50753,50753,0
+Feature-Based,DeepCORAL_none,Transformer,9,67201,67201,0
+Feature-Based,DeepCORAL_tsbw,RNN,9,12737,12737,0
+Feature-Based,DeepCORAL_tsbw,LSTM,9,50753,50753,0
+Feature-Based,DeepCORAL_tsbw,Transformer,9,67201,67201,0
+Feature-Based,DeepCORAL_tsw,RNN,9,12737,12737,0
+Feature-Based,DeepCORAL_tsw,LSTM,9,50753,50753,0
+Feature-Based,DeepCORAL_tsw,Transformer,9,67201,67201,0
+Feature-Based,DeepMMD_none,RNN,9,12737,12737,0
+Feature-Based,DeepMMD_none,LSTM,9,50753,50753,0
+Feature-Based,DeepMMD_none,Transformer,9,67201,67201,0
+Feature-Based,DeepMMD_tsbw,RNN,9,12737,12737,0
+Feature-Based,DeepMMD_tsbw,LSTM,9,50753,50753,0
+Feature-Based,DeepMMD_tsbw,Transformer,9,67201,67201,0
+Feature-Based,DeepMMD_tsw,RNN,9,12737,12737,0
+Feature-Based,DeepMMD_tsw,LSTM,9,50753,50753,0
+Feature-Based,DeepMMD_tsw,Transformer,9,67201,67201,0
+Feature-Based,FA_none,RNN,9,12993,12993,0
+Feature-Based,FA_none,LSTM,9,51777,51777,0
+Feature-Based,FA_none,Transformer,9,67457,67457,0
+Feature-Based,FA_tsbw,RNN,9,12993,12993,0
+Feature-Based,FA_tsbw,LSTM,9,51777,51777,0
+Feature-Based,FA_tsbw,Transformer,9,67457,67457,0
+Feature-Based,FA_tsw,RNN,9,12993,12993,0
+Feature-Based,FA_tsw,LSTM,9,51777,51777,0
+Feature-Based,FA_tsw,Transformer,9,67457,67457,0
+Feature-Based,PRED_none,RNN,9,12801,12801,0
+Feature-Based,PRED_none,LSTM,9,51009,51009,0
+Feature-Based,PRED_none,Transformer,9,67265,67265,0
+Feature-Based,PRED_tsbw,RNN,9,12801,12801,0
+Feature-Based,PRED_tsbw,LSTM,9,51009,51009,0
+Feature-Based,PRED_tsbw,Transformer,9,67265,67265,0
+Feature-Based,PRED_tsw,RNN,9,12801,12801,0
+Feature-Based,PRED_tsw,LSTM,9,51009,51009,0
+Feature-Based,PRED_tsw,Transformer,9,67265,67265,0
+Feature-Based,WDGRL_none,RNN,9,12737,12737,0
+Feature-Based,WDGRL_none,LSTM,9,50753,50753,0
+Feature-Based,WDGRL_none,Transformer,9,67201,67201,0
+Feature-Based,WDGRL_tsbw,RNN,9,12737,12737,0
+Feature-Based,WDGRL_tsbw,LSTM,9,50753,50753,0
+Feature-Based,WDGRL_tsbw,Transformer,9,67201,67201,0
+Feature-Based,WDGRL_tsw,RNN,9,12737,12737,0
+Feature-Based,WDGRL_tsw,LSTM,9,50753,50753,0
+Feature-Based,WDGRL_tsw,Transformer,9,67201,67201,0
+Instance-Based,Baseline,RNN,9,12737,12737,0
+Instance-Based,Baseline,LSTM,9,50753,50753,0
+Instance-Based,Baseline,Transformer,9,67201,67201,0
+Instance-Based,IWC,RNN,9,12737,12737,0
+Instance-Based,IWC,LSTM,9,50753,50753,0
+Instance-Based,IWC,Transformer,9,67201,67201,0
+Instance-Based,IWC+TSBW,RNN,9,12737,12737,0
+Instance-Based,IWC+TSBW,LSTM,9,50753,50753,0
+Instance-Based,IWC+TSBW,Transformer,9,67201,67201,0
+Instance-Based,IWC+TSW,RNN,9,12737,12737,0
+Instance-Based,IWC+TSW,LSTM,9,50753,50753,0
+Instance-Based,IWC+TSW,Transformer,9,67201,67201,0
+Instance-Based,KMM,RNN,9,12737,12737,0
+Instance-Based,KMM,LSTM,9,50753,50753,0
+Instance-Based,KMM,Transformer,9,67201,67201,0
+Instance-Based,KMM+TSBW,RNN,9,12737,12737,0
+Instance-Based,KMM+TSBW,LSTM,9,50753,50753,0
+Instance-Based,KMM+TSBW,Transformer,9,67201,67201,0
+Instance-Based,KMM+TSW,RNN,9,12737,12737,0
+Instance-Based,KMM+TSW,LSTM,9,50753,50753,0
+Instance-Based,KMM+TSW,Transformer,9,67201,67201,0
+Instance-Based,RULSIF,RNN,9,12737,12737,0
+Instance-Based,RULSIF,LSTM,9,50753,50753,0
+Instance-Based,RULSIF,Transformer,9,67201,67201,0
+Instance-Based,RULSIF+TSBW,RNN,9,12737,12737,0
+Instance-Based,RULSIF+TSBW,LSTM,9,50753,50753,0
+Instance-Based,RULSIF+TSBW,Transformer,9,67201,67201,0
+Instance-Based,RULSIF+TSW,RNN,9,12737,12737,0
+Instance-Based,RULSIF+TSW,LSTM,9,50753,50753,0
+Instance-Based,RULSIF+TSW,Transformer,9,67201,67201,0
+Instance-Based,Target-Only,RNN,9,12737,12737,0
+Instance-Based,Target-Only,LSTM,9,50753,50753,0
+Instance-Based,Target-Only,Transformer,9,67201,67201,0
+Instance-Based,TrAdaBoostR2,RNN,9,12737,12737,0
+Instance-Based,TrAdaBoostR2,LSTM,9,50753,50753,0
+Instance-Based,TrAdaBoostR2,Transformer,9,67201,67201,0
+Instance-Based,ULSIF,RNN,9,12737,12737,0
+Instance-Based,ULSIF,LSTM,9,50753,50753,0
+Instance-Based,ULSIF,Transformer,9,67201,67201,0
+Instance-Based,ULSIF+TSBW,RNN,9,12737,12737,0
+Instance-Based,ULSIF+TSBW,LSTM,9,50753,50753,0
+Instance-Based,ULSIF+TSBW,Transformer,9,67201,67201,0
+Instance-Based,ULSIF+TSW,RNN,9,12737,12737,0
+Instance-Based,ULSIF+TSW,LSTM,9,50753,50753,0
+Instance-Based,ULSIF+TSW,Transformer,9,67201,67201,0
+Parameter-Based,Direct-Transfer,RNN,9,12737,0,12737
+Parameter-Based,Direct-Transfer,LSTM,9,50753,0,50753
+Parameter-Based,Direct-Transfer,Transformer,9,67201,0,67201
+Parameter-Based,Feature-Extraction,RNN,9,12737,65,12672
+Parameter-Based,Feature-Extraction,LSTM,9,50753,65,50688
+Parameter-Based,Feature-Extraction,Transformer,9,67201,65,67136
+Parameter-Based,Full-Fine-Tuning,RNN,9,12737,12737,0
+Parameter-Based,Full-Fine-Tuning,LSTM,9,50753,50753,0
+Parameter-Based,Full-Fine-Tuning,Transformer,9,67201,67201,0
+Parameter-Based,Joint-Training,RNN,9,12737,12737,0
+Parameter-Based,Joint-Training,LSTM,9,50753,50753,0
+Parameter-Based,Joint-Training,Transformer,9,67201,67201,0
+Parameter-Based,Label-Aware Joint FT (tsbw),RNN,9,12737,12737,0
+Parameter-Based,Label-Aware Joint FT (tsbw),LSTM,9,50753,50753,0
+Parameter-Based,Label-Aware Joint FT (tsbw),Transformer,9,67201,67201,0
+Parameter-Based,Label-Aware Joint FT (tsw),RNN,9,12737,12737,0
+Parameter-Based,Label-Aware Joint FT (tsw),LSTM,9,50753,50753,0
+Parameter-Based,Label-Aware Joint FT (tsw),Transformer,9,67201,67201,0
+Parameter-Based,Label-Aware Pretrain to Target FT (tsbw),RNN,9,12737,12737,0
+Parameter-Based,Label-Aware Pretrain to Target FT (tsbw),LSTM,9,50753,50753,0
+Parameter-Based,Label-Aware Pretrain to Target FT (tsbw),Transformer,9,67201,67201,0
+Parameter-Based,Label-Aware Pretrain to Target FT (tsw),RNN,9,12737,12737,0
+Parameter-Based,Label-Aware Pretrain to Target FT (tsw),LSTM,9,50753,50753,0
+Parameter-Based,Label-Aware Pretrain to Target FT (tsw),Transformer,9,67201,67201,0
+Parameter-Based,Label-Aware Source Training (tsbw),RNN,9,12737,12737,0
+Parameter-Based,Label-Aware Source Training (tsbw),LSTM,9,50753,50753,0
+Parameter-Based,Label-Aware Source Training (tsbw),Transformer,9,67201,67201,0
+Parameter-Based,Label-Aware Source Training (tsw),RNN,9,12737,12737,0
+Parameter-Based,Label-Aware Source Training (tsw),LSTM,9,50753,50753,0
+Parameter-Based,Label-Aware Source Training (tsw),Transformer,9,67201,67201,0
+Parameter-Based,LinInt (alpha=0.00),RNN,9,12737,12737,0
+Parameter-Based,LinInt (alpha=0.00),LSTM,9,50753,50753,0
+Parameter-Based,LinInt (alpha=0.00),Transformer,9,67201,67201,0
+Parameter-Based,LinInt (alpha=0.25),RNN,9,12737,12737,0
+Parameter-Based,LinInt (alpha=0.25),LSTM,9,50753,50753,0
+Parameter-Based,LinInt (alpha=0.25),Transformer,9,67201,67201,0
+Parameter-Based,LinInt (alpha=0.50),RNN,9,12737,12737,0
+Parameter-Based,LinInt (alpha=0.50),LSTM,9,50753,50753,0
+Parameter-Based,LinInt (alpha=0.50),Transformer,9,67201,67201,0
+Parameter-Based,LinInt (alpha=0.75),RNN,9,12737,12737,0
+Parameter-Based,LinInt (alpha=0.75),LSTM,9,50753,50753,0
+Parameter-Based,LinInt (alpha=0.75),Transformer,9,67201,67201,0
+Parameter-Based,LinInt (alpha=1.00),RNN,9,12737,12737,0
+Parameter-Based,LinInt (alpha=1.00),LSTM,9,50753,50753,0
+Parameter-Based,LinInt (alpha=1.00),Transformer,9,67201,67201,0
+Parameter-Based,Partial-FT-First,RNN,9,12737,4417,8320
+Parameter-Based,Partial-FT-First,LSTM,9,50753,17473,33280
+Parameter-Based,Partial-FT-Last,RNN,9,12737,8385,4352
+Parameter-Based,Partial-FT-Last,LSTM,9,50753,33345,17408
+Parameter-Based,Source Model + Target Calibration,RNN,9,12737,0,12737
+Parameter-Based,Source Model + Target Calibration,LSTM,9,50753,0,50753
+Parameter-Based,Source Model + Target Calibration,Transformer,9,67201,0,67201
+Parameter-Based,Source-to-Target Linear Mapping,RNN,9,12737,0,12737
+Parameter-Based,Source-to-Target Linear Mapping,LSTM,9,50753,0,50753
+Parameter-Based,Source-to-Target Linear Mapping,Transformer,9,67201,0,67201
+Parameter-Based,Target-Only,RNN,9,12737,12737,0
+Parameter-Based,Target-Only,LSTM,9,50753,50753,0
+Parameter-Based,Target-Only,Transformer,9,67201,67201,0
+Parameter-Based,Target-Priority Joint FT (tsbw),RNN,9,12737,12737,0
+Parameter-Based,Target-Priority Joint FT (tsbw),LSTM,9,50753,50753,0
+Parameter-Based,Target-Priority Joint FT (tsbw),Transformer,9,67201,67201,0
+Parameter-Based,Target-Priority Joint FT (tsw),RNN,9,12737,12737,0
+Parameter-Based,Target-Priority Joint FT (tsw),LSTM,9,50753,50753,0
+Parameter-Based,Target-Priority Joint FT (tsw),Transformer,9,67201,67201,0
+Parameter-Based,Thresholded Label-Aware FT (tsbw),RNN,9,12737,12737,0
+Parameter-Based,Thresholded Label-Aware FT (tsbw),LSTM,9,50753,50753,0
+Parameter-Based,Thresholded Label-Aware FT (tsbw),Transformer,9,67201,67201,0
+Parameter-Based,Thresholded Label-Aware FT (tsw),RNN,9,12737,12737,0
+Parameter-Based,Thresholded Label-Aware FT (tsw),LSTM,9,50753,50753,0
+Parameter-Based,Thresholded Label-Aware FT (tsw),Transformer,9,67201,67201,0
+Parameter-Based,Thresholded Label-Aware Source Training (tsbw),RNN,9,12737,12737,0
+Parameter-Based,Thresholded Label-Aware Source Training (tsbw),LSTM,9,50753,50753,0
+Parameter-Based,Thresholded Label-Aware Source Training (tsbw),Transformer,9,67201,67201,0
+Parameter-Based,Thresholded Label-Aware Source Training (tsw),RNN,9,12737,12737,0
+Parameter-Based,Thresholded Label-Aware Source Training (tsw),LSTM,9,50753,50753,0
+Parameter-Based,Thresholded Label-Aware Source Training (tsw),Transformer,9,67201,67201,0

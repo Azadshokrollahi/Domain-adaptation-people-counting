@@ -1,0 +1,25 @@
+Setting,Backbone,Δ Full-FT,Δ Feat-Ext,Δ LA-PreFT TSW,Δ LA-PreFT TSBW,Δ Target-Only
+Room_A -> Room_B,RNN,-0.02,+0.49,-0.00,+0.08,+0.00
+Room_A -> Room_B,LSTM,-0.02,+0.74,-0.00,-0.00,+0.00
+Room_A -> Room_B,Transformer,-0.00,+0.16,-0.02,+0.01,+0.00
+Room_A -> Room_P,RNN,+0.01,-0.10,+0.06,+0.05,+0.04
+Room_A -> Room_P,LSTM,+0.02,+0.38,+0.06,+0.05,+0.04
+Room_A -> Room_P,Transformer,+0.03,+0.06,+0.01,+0.03,+0.05
+Room_B -> Room_P,RNN,+0.05,+0.11,+0.04,+0.04,+0.04
+Room_B -> Room_P,LSTM,+0.06,+0.33,+0.09,+0.04,+0.04
+Room_B -> Room_P,Transformer,+0.04,+0.09,+0.04,+0.03,+0.05
+Room_C -> Room_A,RNN,+0.04,+0.36,+0.03,-0.03,-0.05
+Room_C -> Room_A,LSTM,+0.01,-0.19,-0.05,+0.01,-0.06
+Room_C -> Room_A,Transformer,-0.04,-0.08,+0.16,+0.17,-0.08
+Room_C -> Room_P,RNN,+0.07,+0.12,+0.06,+0.09,+0.04
+Room_C -> Room_P,LSTM,+0.04,+0.18,+0.05,+0.04,+0.04
+Room_C -> Room_P,Transformer,+0.03,+0.04,+0.04,+0.04,+0.05
+Room_P -> Room_A,RNN,-0.01,+0.29,-0.05,-0.10,-0.05
+Room_P -> Room_A,LSTM,+0.08,+0.43,+0.04,+0.01,-0.06
+Room_P -> Room_A,Transformer,-0.07,+0.11,+0.00,-0.01,-0.08
+Room_P -> Room_B,RNN,-0.00,+0.40,-0.00,-0.00,+0.00
+Room_P -> Room_B,LSTM,+0.07,+0.65,+0.01,+0.05,+0.00
+Room_P -> Room_B,Transformer,+0.10,+0.15,+0.17,+0.16,+0.00
+Room_P -> Room_C,RNN,+0.05,+0.06,+0.12,+0.05,+0.00
+Room_P -> Room_C,LSTM,+0.18,+0.21,+0.00,+0.07,+0.00
+Room_P -> Room_C,Transformer,+0.06,+0.25,+0.10,+0.05,+0.00

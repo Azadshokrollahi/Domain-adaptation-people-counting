@@ -1,7 +1,7 @@
 """
 Feature-Based Domain Adaptation for People Counting (Regression)
 
-7 Methods × 2 weighting schemes (none, TSBW) = 14 runs per scenario × model × ws
+7 Methods × 3 weighting schemes (none, TSBW, TSW) = 21 runs per scenario × model × ws
 ALL with RANDOM INITIALIZATION — no pretrained weights.
 
 Reads:
@@ -20,6 +20,11 @@ Methods:
   5. FA           — Feature Augmentation [shared, source-specific, target-specific]
   6. CCSA         — Label-aware contrastive semantic alignment (regression-adapted)
   7. WDGRL        — Wasserstein Distance Guided Representation Learning
+
+Weight Schemes:
+  none  — uniform weights
+  TSBW  — sqrt frequency ratio + floor=0.3 (smoothed)
+  TSW   — linear frequency ratio, no sqrt, no floor (stronger target emphasis)
 
 Heterogeneous mode:
   • Each room uses its own feature list from rooms.yaml.
@@ -91,12 +96,16 @@ def seed_worker(worker_id):
 #  TSBW PARAMETERS (matches parameter_based_methods.py)
 ##############################################################################
 
-WEIGHT_SCHEMES   = ['none', 'tsbw']
+WEIGHT_SCHEMES   = ['none', 'tsbw', 'tsw']              # ── NEW: TSW ──
 FREQUENCY_EPS    = 1.0
 WEIGHT_CLIP_MAX  = 10.0
 TSBW_FLOOR       = 0.3
 TSBW_ABSENT      = 0.05
 TSBW_USE_SQRT    = True
+
+# ── NEW: TSW ──────────────────────────────────────────────────────────────
+TSW_ABSENT       = 0.05   # labels absent in target → weight 0 (hard exclusion)
+# ── END NEW ───────────────────────────────────────────────────────────────
 
 
 def compute_label_weight_table(y_ref, eps=FREQUENCY_EPS,
@@ -117,6 +126,35 @@ def compute_label_weight_table(y_ref, eps=FREQUENCY_EPS,
             table[int(yv)] = float(absent)
     table[-1] = float(absent)
     return table, max_y
+
+
+# ── NEW: TSW ──────────────────────────────────────────────────────────────
+def compute_tsw_label_weight_table(y_ref, eps=FREQUENCY_EPS,
+                                    absent=TSW_ABSENT):
+    """
+    TSW: Target Sample Weighting.
+    Linear proportional weighting — no sqrt, no floor.
+    Labels absent in target → weight TSW_ABSENT (0.0).
+
+    Difference from TSBW:
+      TSBW: sqrt(ratio) + floor=0.3   → smoothed, prevents extreme down-weighting
+      TSW:  raw ratio,  no floor      → stronger emphasis on target-frequent labels
+    """
+    y_int = np.clip(np.round(y_ref).astype(int), 0, None)
+    max_y = int(y_int.max())
+    counts = np.bincount(y_int, minlength=max_y + 1).astype(float)
+    max_count = counts.max()
+
+    table = {}
+    for yv in range(max_y + 1):
+        if counts[yv] > 0:
+            ratio = (counts[yv] + eps) / (max_count + eps)
+            table[int(yv)] = float(ratio)   # no sqrt, no floor
+        else:
+            table[int(yv)] = float(absent)
+    table[-1] = float(absent)
+    return table, max_y
+# ── END NEW ───────────────────────────────────────────────────────────────
 
 
 def apply_weight_table(y_samples, table, max_y_ref):
@@ -140,6 +178,15 @@ def tsbw_source_weights(y_src, y_tgt_ref):
     table, max_y = compute_label_weight_table(y_tgt_ref)
     raw = apply_weight_table(y_src, table, max_y)
     return normalize_and_clip(raw)
+
+
+# ── NEW: TSW ──────────────────────────────────────────────────────────────
+def tsw_source_weights(y_src, y_tgt_ref):
+    """TSW version of tsbw_source_weights — linear ratio, no sqrt, no floor."""
+    table, max_y = compute_tsw_label_weight_table(y_tgt_ref)
+    raw = apply_weight_table(y_src, table, max_y)
+    return normalize_and_clip(raw)
+# ── END NEW ───────────────────────────────────────────────────────────────
 
 
 ##############################################################################
@@ -167,7 +214,6 @@ ALL_METHODS = ["CORAL", "DeepCORAL", "DeepMMD", "PRED", "FA", "CCSA", "WDGRL"]
 ##############################################################################
 
 def get_variant_features(room_id, variant):
-    """Return feature list for (room_id, variant); fall back to homogeneous."""
     fv = ROOMS[room_id].get("feature_variants", {})
     if variant in fv:
         return fv[variant]
@@ -177,7 +223,6 @@ def get_variant_features(room_id, variant):
 
 
 def variant_scenario_supported(src_id, tgt_id, variant):
-    """Both rooms must have features for this variant (with fallback)."""
     return (get_variant_features(src_id, variant) is not None
             and get_variant_features(tgt_id, variant) is not None)
 
@@ -641,6 +686,15 @@ def _make_combined_weights(src_y, tgt_y, scheme):
         sw = tsbw_source_weights(src_y, tgt_y)
         w = np.concatenate([sw, np.ones(len(tgt_y), dtype=np.float32)])
         return w, time.perf_counter() - t0
+    # ── NEW: TSW ──────────────────────────────────────────────────────────
+    elif scheme == 'tsw':
+        t0 = time.perf_counter()
+        sw = tsw_source_weights(src_y, tgt_y)
+        w = np.concatenate([sw, np.ones(len(tgt_y), dtype=np.float32)])
+        print(f"      TSW weights: mean={sw.mean():.4f}, "
+              f"min={sw.min():.4f}, max={sw.max():.4f}")
+        return w, time.perf_counter() - t0
+    # ── END NEW ───────────────────────────────────────────────────────────
     return None, 0.0
 
 
@@ -706,6 +760,12 @@ def run_deep_coral(data, model_type, ws, out_dir, epochs, scheme, lambda_coral=1
         t0_w = time.perf_counter()
         table_max = compute_label_weight_table(data['tgt_tr_y'])
         weight_compute_t = time.perf_counter() - t0_w
+    # ── NEW: TSW ──────────────────────────────────────────────────────────
+    elif scheme == 'tsw':
+        t0_w = time.perf_counter()
+        table_max = compute_tsw_label_weight_table(data['tgt_tr_y'])
+        weight_compute_t = time.perf_counter() - t0_w
+    # ── END NEW ───────────────────────────────────────────────────────────
     else:
         table_max, weight_compute_t = None, 0.0
 
@@ -735,6 +795,12 @@ def run_deep_mmd(data, model_type, ws, out_dir, epochs, scheme, lambda_mmd=1.0):
         t0_w = time.perf_counter()
         table_max = compute_label_weight_table(data['tgt_tr_y'])
         weight_compute_t = time.perf_counter() - t0_w
+    # ── NEW: TSW ──────────────────────────────────────────────────────────
+    elif scheme == 'tsw':
+        t0_w = time.perf_counter()
+        table_max = compute_tsw_label_weight_table(data['tgt_tr_y'])
+        weight_compute_t = time.perf_counter() - t0_w
+    # ── END NEW ───────────────────────────────────────────────────────────
     else:
         table_max, weight_compute_t = None, 0.0
 
@@ -875,6 +941,12 @@ def run_ccsa(data, model_type, ws, out_dir, epochs, scheme,
         t0_w = time.perf_counter()
         table_max = compute_label_weight_table(data['tgt_tr_y'])
         weight_compute_t = time.perf_counter() - t0_w
+    # ── NEW: TSW ──────────────────────────────────────────────────────────
+    elif scheme == 'tsw':
+        t0_w = time.perf_counter()
+        table_max = compute_tsw_label_weight_table(data['tgt_tr_y'])
+        weight_compute_t = time.perf_counter() - t0_w
+    # ── END NEW ───────────────────────────────────────────────────────────
     else:
         table_max, weight_compute_t = None, 0.0
 
@@ -911,6 +983,12 @@ def run_wdgrl(data, model_type, ws, out_dir, epochs, scheme,
         t0_w = time.perf_counter()
         table_max = compute_label_weight_table(data['tgt_tr_y'])
         weight_compute_t = time.perf_counter() - t0_w
+    # ── NEW: TSW ──────────────────────────────────────────────────────────
+    elif scheme == 'tsw':
+        t0_w = time.perf_counter()
+        table_max = compute_tsw_label_weight_table(data['tgt_tr_y'])
+        weight_compute_t = time.perf_counter() - t0_w
+    # ── END NEW ───────────────────────────────────────────────────────────
     else:
         table_max, weight_compute_t = None, 0.0
 
@@ -995,8 +1073,9 @@ def create_comparison_plots(results, ws, scenario_name, model_type, out_dir):
                     ('medae', 'MedAE'), ('acc_pm1', 'Acc±1 (%)'), ('acc_pm2', 'Acc±2 (%)')]
 
     fig, axes = plt.subplots(2, 3, figsize=(26, 11))
-    fig.suptitle(f'Feature-Based DA (none vs TSBW): {scenario_name} | {model_type} | ws={ws}',
-                 fontsize=13, fontweight='bold')
+    fig.suptitle(
+        f'Feature-Based DA (none vs TSBW vs TSW): {scenario_name} | {model_type} | ws={ws}',  # ── NEW: TSW ──
+        fontsize=13, fontweight='bold')
     for idx, (key, ylabel) in enumerate(metrics_list):
         ax = axes[idx // 3][idx % 3]
         vals = [r['metrics']['all'][key] for r in results]
@@ -1069,6 +1148,10 @@ def main():
     print(f"7 Methods × {len(WEIGHT_SCHEMES)} schemes = {7 * len(WEIGHT_SCHEMES)} runs / config")
     print(f"Variants: {FEATURE_VARIANTS}")
     print(f"TSBW: floor={TSBW_FLOOR}, absent={TSBW_ABSENT}, sqrt={TSBW_USE_SQRT}")
+    # ── NEW: TSW ──────────────────────────────────────────────────────────
+    print(f"TSW:  absent={TSW_ABSENT}, linear ratio (no sqrt, no floor), "
+          f"eps={FREQUENCY_EPS}, clip={WEIGHT_CLIP_MAX}")
+    # ── END NEW ───────────────────────────────────────────────────────────
     print(f"OUTPUT_ROOT: {OUTPUT_ROOT}")
     print(f"User: Azadshokrollahi | {timestamp} UTC")
     print("=" * 100)
@@ -1084,7 +1167,6 @@ def main():
         valid_scenarios = [(s, t) for (s, t) in TRANSFER_SCENARIOS
                            if variant_scenario_supported(s, t, variant)]
 
-        # For feature-based, ALSO require matching feature counts
         runnable = []
         for s, t in valid_scenarios:
             s_feats = get_variant_features(s, variant)
@@ -1195,7 +1277,7 @@ def main():
                           f"{len(method_results)}/{7 * len(WEIGHT_SCHEMES)}")
 
     # ─────────────────────────────────────────────────────────────────────────
-    # MASTER CSVs (one per variant)
+    # MASTER CSVs
     # ─────────────────────────────────────────────────────────────────────────
     print("\n\n" + "=" * 100)
     print("FINAL RESULTS — FEATURE-BASED DA")
@@ -1237,6 +1319,21 @@ def main():
             print(f"  {sc:<25} {mdl:<12} {best['method']:<22} "
                   f"{best['weight_scheme']:<8} "
                   f"{best['test_mae']:<8.4f} {best['test_acc_pm1']:<8.2f}")
+
+        # ── NEW: TSW — TSBW vs TSW summary ────────────────────────────────
+        print(f"\n  [{variant}] none vs TSBW vs TSW (avg MAE per method base):")
+        for base in ALL_METHODS:
+            none_df = df[df['method'] == f'{base}_none']
+            tsbw_df = df[df['method'] == f'{base}_tsbw']
+            tsw_df  = df[df['method'] == f'{base}_tsw']
+            if len(none_df) > 0:
+                line = f"    {base:<12}: none={none_df['test_mae'].mean():.4f}"
+                if len(tsbw_df) > 0:
+                    line += f"  TSBW={tsbw_df['test_mae'].mean():.4f}"
+                if len(tsw_df) > 0:
+                    line += f"  TSW={tsw_df['test_mae'].mean():.4f}"
+                print(line)
+        # ── END NEW ───────────────────────────────────────────────────────
 
     print("\n" + "=" * 100)
     print("✓ FEATURE-BASED DA COMPLETED!")
